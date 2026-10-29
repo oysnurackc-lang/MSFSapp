@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flight Deck EFB | Dark Titanium Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at center, #181a20 0%, #050507 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 15px;
+      overflow-x: hidden;
+      color: #e2e8f0;
+    }
+
+    .orbitron {
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    /* Marco de la Tablet */
+    .tablet-frame {
+      background: linear-gradient(145deg, #1c1e24, #0a0b0e);
+      border-radius: 44px;
+      padding: 18px;
+      box-shadow: 
+        0 30px 70px rgba(0, 0, 0, 0.9),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.9);
+      position: relative;
+      width: 100%;
+      max-width: 1100px;
+      height: 680px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Cámara de la tablet */
+    .tablet-camera {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      background-color: #050507;
+      border: 2px solid #282a32;
+      border-radius: 50%;
+      z-index: 50;
+    }
+
+    /* Pantalla */
+    .screen {
+      background: linear-gradient(135deg, #0a0a0c 0%, #121318 50%, #0d0e12 100%);
+      border-radius: 30px;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.85);
+    }
+
+    /* Fondo dinámico */
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .glowing-orbs {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0) 70%);
+      top: -120px;
+      right: -120px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* Glassmorphism Oscuro */
+    .glass-card {
+      background: rgba(22, 24, 30, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Tarjetas de Iconos */
+    .app-icon-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .app-icon-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.05);
+    }
+
+    .app-icon-card:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+
+    /* Botón Home / Indicador inferior tipo tablet */
+    .home-indicator {
+      width: 150px;
+      height: 5px;
+      background-color: rgba(255, 255, 255, 0.4);
+      border-radius: 3px;
+      margin: 8px auto;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .home-indicator:hover {
+      background-color: rgba(255, 255, 255, 0.9);
+      transform: scaleX(1.1);
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    }
+
+    .home-indicator:active {
+      transform: scaleX(0.95);
+    }
+
+    /* Transición suave entre pantallas */
+    .screen-view {
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .hidden-view {
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="tablet-frame">
+    <div class="tablet-camera"></div>
+
+    <div class="screen">
+      <div class="bg-grid"></div>
+      <div class="glowing-orbs"></div>
+
+      <!-- Barra Superior -->
+      <header class="w-full px-6 py-3 bg-[#0e0f13]/90 backdrop-blur-md border-b border-white/10 flex justify-between items-center z-20 text-xs font-medium text-zinc-300">
+        <div class="flex items-center space-x-3">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-200 border border-zinc-600/50 font-mono text-[11px] font-semibold">
+            <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> EFB ONLINE
+          </span>
+          <span class="hidden sm:inline text-zinc-400 tracking-wider font-semibold">MSFS FLIGHT DECK</span>
+        </div>
+
+        <!-- Relojes -->
+        <div class="flex items-center space-x-6 font-mono">
+          <div class="text-right">
+            <span class="text-zinc-500 text-[10px] block leading-none">UTC / ZULU</span>
+            <span id="utc-clock" class="text-white font-bold text-sm">00:00:00 Z</span>
+          </div>
+          <div class="text-right">
+            <span class="text-zinc-500 text-[10px] block leading-none">LOCAL</span>
+            <span id="local-clock" class="text-zinc-300 font-bold text-sm">00:00:00</span>
+          </div>
+        </div>
+
+        <!-- Estado de Sistema -->
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-1.5 text-zinc-300" title="GPS Synced">
+            <i class="fa-solid fa-satellite text-zinc-400"></i>
+            <span class="hidden md:inline text-[11px] text-zinc-400">3D FIX</span>
+          </div>
+          <div class="flex items-center space-x-1.5 text-zinc-300">
+            <i class="fa-solid fa-wifi text-zinc-300"></i>
+          </div>
+          <div class="flex items-center space-x-1.5 text-zinc-300">
+            <span class="text-[11px] font-mono text-zinc-300">100%</span>
+            <i class="fa-solid fa-battery-full text-zinc-200 text-sm"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- VISTA 1: Pantalla de Reposo / Lockscreen Minimalista -->
+      <div id="standby-screen" class="screen-view flex-1 flex flex-col items-center justify-center text-center p-8 z-10 cursor-pointer" onclick="toggleHome(true)">
+        <div class="flex flex-col items-center my-auto">
+          <i class="fa-solid fa-plane text-zinc-600 text-4xl mb-6"></i>
+          <h1 id="standby-time" class="text-7xl md:text-8xl font-extrabold text-white tracking-wider orbitron mb-2">00:00</h1>
+          <p id="standby-date" class="text-zinc-400 text-sm md:text-base tracking-widest uppercase font-medium">Cargando fecha...</p>
+        </div>
+        <div class="mt-auto flex flex-col items-center gap-2 text-zinc-500 text-xs tracking-widest animate-bounce">
+          <span>Toca el botón Home para acceder</span>
+          <i class="fa-solid fa-chevron-down text-[10px]"></i>
+        </div>
+      </div>
+
+      <!-- VISTA 2: Menú Principal de Aplicaciones -->
+      <main id="apps-screen" class="screen-view hidden-view flex-1 p-6 md:p-10 flex flex-col justify-between z-10 overflow-y-auto">
+        
+        <!-- Cabecera -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-wider orbitron flex items-center gap-3">
+              <i class="fa-solid fa-plane-departure text-zinc-300"></i> FLIGHT MANAGEMENT
+            </h1>
+            <p class="text-zinc-400 text-xs md:text-sm mt-1">Selecciona una aplicación de vuelo para comenzar</p>
+          </div>
+
+          <!-- Selector de Apertura -->
+          <div class="glass-card rounded-xl p-1.5 flex items-center gap-1 text-xs border border-white/10">
+            <span class="text-zinc-400 px-2 font-medium">Abrir en:</span>
+            <button id="btn-same" onclick="setOpenMode('same')" class="px-3 py-1 rounded-lg text-black font-semibold bg-zinc-200 transition-all shadow-sm">
+              Misma Pestaña
+            </button>
+            <button id="btn-new" onclick="setOpenMode('new')" class="px-3 py-1 rounded-lg text-zinc-400 hover:text-white font-medium transition-all">
+              Nueva Pestaña
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Iconos Principales (GitHub Pages) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 my-auto py-4">
+          
+          <!-- APP 1: Checklist & METAR -->
+          <div onclick="abrirApp(1)" class="app-icon-card glass-card rounded-2xl p-8 flex flex-col items-center text-center group">
+            <div class="w-24 h-24 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-300 flex items-center justify-center text-white text-4xl mb-6 shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform duration-300">
+              <i class="fa-solid fa-list-check"></i>
+            </div>
+            <h3 class="text-white font-bold text-xl mb-2 tracking-wide group-hover:text-teal-300 transition-colors">CHECKLIST | METAR</h3>
+            <p class="text-zinc-400 text-xs leading-relaxed mb-6">Listas de chequeo, información METAR en tiempo real y Top of Descent.</p>
+            <span class="mt-auto inline-flex items-center gap-2 text-xs text-teal-400 font-semibold group-hover:translate-x-1 transition-transform">
+              Ejecutar Aplicación <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </span>
+          </div>
+
+          <!-- APP 2: Flight Logbook -->
+          <div onclick="abrirApp(2)" class="app-icon-card glass-card rounded-2xl p-8 flex flex-col items-center text-center group">
+            <div class="w-24 h-24 rounded-2xl bg-gradient-to-tr from-amber-600 to-yellow-400 flex items-center justify-center text-white text-4xl mb-6 shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform duration-300">
+              <i class="fa-solid fa-book-bookmark"></i>
+            </div>
+            <h3 class="text-white font-bold text-xl mb-2 tracking-wide group-hover:text-amber-300 transition-colors">FLIGHT LOGBOOK</h3>
+            <p class="text-zinc-400 text-xs leading-relaxed mb-6">Registro oficial de horas de vuelo, aterrizajes y cuaderno de bitácora.</p>
+            <span class="mt-auto inline-flex items-center gap-2 text-xs text-amber-400 font-semibold group-hover:translate-x-1 transition-transform">
+              Ejecutar Aplicación <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </span>
+          </div>
+
+          <!-- APP 3: Estadísticas & Gráficas (Nueva) -->
+          <div onclick="abrirApp(3)" class="app-icon-card glass-card rounded-2xl p-8 flex flex-col items-center text-center group">
+            <div class="w-24 h-24 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-400 flex items-center justify-center text-white text-4xl mb-6 shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform duration-300">
+              <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <h3 class="text-white font-bold text-xl mb-2 tracking-wide group-hover:text-purple-300 transition-colors">ESTADÍSTICAS & DATOS</h3>
+            <p class="text-zinc-400 text-xs leading-relaxed mb-6">Gráficas avanzadas y analítica de alto volumen de datos de tus vuelos.</p>
+            <span class="mt-auto inline-flex items-center gap-2 text-xs text-purple-400 font-semibold group-hover:translate-x-1 transition-transform">
+              Ejecutar Aplicación <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </span>
+          </div>
+
+        </div>
+
+        <div></div>
+      </main>
+
+      <!-- Pie de Tablet (Botón Home Funcional) -->
+      <footer class="w-full py-2 flex justify-center items-center z-20">
+        <div class="home-indicator" onclick="toggleHome()" title="Botón Inicio / Reposo"></div>
+      </footer>
+
+    </div>
+  </div>
+
+  <script>
+    // Enlaces de GitHub Pages para tus aplicaciones
+    const rutas = {
+      1: "https://oysnurackc-lang.github.io/checklist/",
+      2: "https://oysnurackc-lang.github.io/rutas_MSFS/",
+      3: "https://oysnurackc-lang.github.io/graficas_MSFS/"
+    };
+
+    let openInNewTab = false;
+    let isAppsViewOpen = false;
+
+    // Conmutador del Botón Home
+    function toggleHome(forceOpenApps = false) {
+      const standbyView = document.getElementById('standby-screen');
+      const appsView = document.getElementById('apps-screen');
+
+      if (forceOpenApps || !isAppsViewOpen) {
+        // Mostrar menú de aplicaciones
+        standbyView.classList.add('hidden-view');
+        appsView.classList.remove('hidden-view');
+        isAppsViewOpen = true;
+      } else {
+        // Mostrar pantalla de inicio / reposo
+        appsView.classList.add('hidden-view');
+        standbyView.classList.remove('hidden-view');
+        isAppsViewOpen = false;
+      }
+    }
+
+    function setOpenMode(mode) {
+      const btnSame = document.getElementById('btn-same');
+      const btnNew = document.getElementById('btn-new');
+
+      if (mode === 'new') {
+        openInNewTab = true;
+        btnNew.className = "px-3 py-1 rounded-lg text-black font-semibold bg-zinc-200 transition-all shadow-sm";
+        btnSame.className = "px-3 py-1 rounded-lg text-zinc-400 hover:text-white font-medium transition-all";
+      } else {
+        openInNewTab = false;
+        btnSame.className = "px-3 py-1 rounded-lg text-black font-semibold bg-zinc-200 transition-all shadow-sm";
+        btnNew.className = "px-3 py-1 rounded-lg text-zinc-400 hover:text-white font-medium transition-all";
+      }
+    }
+
+    function abrirApp(numeroApp) {
+      const url = rutas[numeroApp];
+      if (url) {
+        if (openInNewTab) {
+          window.open(url, '_blank');
+        } else {
+          window.location.href = url;
+        }
+      } else {
+        alert("Ruta no configurada para la aplicación " + numeroApp);
+      }
+    }
+
+    function updateClocks() {
+      const now = new Date();
+      
+      // UTC Clock
+      const utcHours = String(now.getUTCHours()).padStart(2, '0');
+      const utcMinutes = String(now.getUTCMinutes()).padStart(2, '0');
+      const utcSeconds = String(now.getUTCSeconds()).padStart(2, '0');
+      document.getElementById('utc-clock').textContent = `${utcHours}:${utcMinutes}:${utcSeconds} Z`;
+
+      // Local Clock
+      const localHours = String(now.getHours()).padStart(2, '0');
+      const localMinutes = String(now.getMinutes()).padStart(2, '0');
+      const localSeconds = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('local-clock').textContent = `${localHours}:${localMinutes}:${localSeconds}`;
+
+      // Clock Standby pantalla grande
+      document.getElementById('standby-time').textContent = `${localHours}:${localMinutes}`;
+
+      // Fecha en Standby
+      const opcionesFecha = { weekday: 'long', day: 'numeric', month: 'long' };
+      const fechaTexto = now.toLocaleDateString('es-ES', opcionesFecha);
+      document.getElementById('standby-date').textContent = fechaTexto;
+    }
+
+    setInterval(updateClocks, 1000);
+    updateClocks();
+  </script>
+</body>
+</html>
